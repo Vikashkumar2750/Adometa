@@ -1,0 +1,20 @@
+{
+  "name": "techaasvik-platform",
+  "version": "1.0.0",
+  "description": "Techaasvik Multi-Tenant SaaS Platform",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "backend:dev": "cd backend && npm run start:dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "start:dev": "npm run backend:dev",
+    "start": "npm run backend:dev",
+    "dev": "npm run backend:dev",
+    "migrate:billing": "cd backend && node run-billing-migration.js",
+    "migrate:team": "cd backend && node run-team-migration.js",
+    "migrate:support": "cd backend && node run-migration-support.js",
+    "migrate:all": "npm run migrate:billing && npm run migrate:team && npm run migrate:support"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
