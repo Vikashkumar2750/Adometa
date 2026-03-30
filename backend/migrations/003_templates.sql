@@ -39,18 +39,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_tenant_name_unique
 ON templates("tenantId", name) 
 WHERE "deletedAt" IS NULL;
 
--- Add check constraints
-ALTER TABLE templates
-ADD CONSTRAINT chk_templates_category 
-CHECK (category IN ('MARKETING', 'UTILITY', 'AUTHENTICATION'));
+-- Add check constraints (idempotent — safe to re-run)
+DO $$ BEGIN
+  ALTER TABLE templates
+    ADD CONSTRAINT chk_templates_category
+    CHECK (category IN ('MARKETING', 'UTILITY', 'AUTHENTICATION'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-ALTER TABLE templates
-ADD CONSTRAINT chk_templates_status 
-CHECK (status IN ('draft', 'pending', 'approved', 'rejected'));
+DO $$ BEGIN
+  ALTER TABLE templates
+    ADD CONSTRAINT chk_templates_status
+    CHECK (status IN ('draft', 'pending', 'approved', 'rejected'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-ALTER TABLE templates
-ADD CONSTRAINT chk_templates_language 
-CHECK (language IN ('en', 'en_US', 'es', 'pt_BR', 'hi'));
+DO $$ BEGIN
+  ALTER TABLE templates
+    ADD CONSTRAINT chk_templates_language
+    CHECK (language IN ('en', 'en_US', 'es', 'pt_BR', 'hi'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Add comments
 COMMENT ON TABLE templates IS 'WhatsApp message templates for campaigns';

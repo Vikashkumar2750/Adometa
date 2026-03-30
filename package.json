@@ -12,7 +12,7 @@
     "migrate:billing": "cd backend && node run-billing-migration.js",
     "migrate:team": "cd backend && node run-team-migration.js",
     "migrate:support": "cd backend && node run-migration-support.js",
-    "migrate:all": "npm run migrate:billing && npm run migrate:team && npm run migrate:support"
+    "migrate:all": "cd backend && node run-all-migrations.js"
   },
   "keywords": [],
   "author": "",

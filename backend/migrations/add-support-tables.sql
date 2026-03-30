@@ -37,13 +37,19 @@ CREATE TABLE IF NOT EXISTS support_messages (
     ticket_id   UUID        NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
     sender_id   UUID        NOT NULL,
     sender_name VARCHAR(100) NOT NULL,
-    sender_role VARCHAR(20) NOT NULL CHECK (sender_role IN ('user', 'agent')),
+    sender_role VARCHAR(20) NOT NULL DEFAULT 'user',
     content     TEXT        NOT NULL,
     attachments JSONB,
     is_read     BOOLEAN     NOT NULL DEFAULT false,
     read_at     TIMESTAMP,
     created_at  TIMESTAMP   NOT NULL DEFAULT NOW()
 );
+
+DO $$ BEGIN
+  ALTER TABLE support_messages
+    ADD CONSTRAINT chk_support_messages_sender_role
+    CHECK (sender_role IN ('user', 'agent'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE INDEX IF NOT EXISTS idx_support_messages_ticket ON support_messages(ticket_id);
 CREATE INDEX IF NOT EXISTS idx_support_messages_created ON support_messages(created_at ASC);

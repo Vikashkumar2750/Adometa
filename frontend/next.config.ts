@@ -1,16 +1,18 @@
 import type { NextConfig } from "next";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // Proxy API requests locally to avoid CORS issues
+  // Proxy /api/* → backend (avoids CORS in both dev and prod)
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/:path*'
-      }
-    ]
-  }
+        destination: `${API_URL}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
