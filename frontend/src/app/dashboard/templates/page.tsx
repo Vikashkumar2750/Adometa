@@ -14,8 +14,9 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 
-const BACKEND_BASE = 'http://localhost:3001';
-const API_BASE = `${BACKEND_BASE}/api`;
+const RAW_API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BACKEND_BASE = RAW_API.replace(/\/api$/, '');
+const API_BASE = RAW_API.endsWith('/api') ? RAW_API : `${BACKEND_BASE}/api`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ButtonType = 'QUICK_REPLY' | 'URL' | 'PHONE_NUMBER';

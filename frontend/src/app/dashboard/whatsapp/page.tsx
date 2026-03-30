@@ -14,7 +14,8 @@ import {
     Lock, Zap, Copy, CheckCheck, WifiOff, XCircle, Info,
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:3001/api';
+const RAW_API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE = RAW_API.endsWith('/api') ? RAW_API : `${RAW_API.replace(/\/$/, '')}/api`;
 
 function getAuthHeaders() {
     const token = Cookies.get('token') || localStorage.getItem('token');
