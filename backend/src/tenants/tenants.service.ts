@@ -42,6 +42,7 @@ export class TenantsService {
             owner_email: createTenantDto.owner_email,
             timezone: createTenantDto.timezone || 'UTC',
             locale: createTenantDto.locale || 'en',
+            plan: createTenantDto.plan || 'FREE_TRIAL',
             status: 'PENDING_APPROVAL' // Default status
         });
 

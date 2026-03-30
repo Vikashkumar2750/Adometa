@@ -34,7 +34,7 @@ export class CreateTenantDto {
     )
     password: string;
 
-    @ApiProperty({ example: 'UTC', description: 'Tenant timezone', required: false, default: 'UTC' })
+    @ApiProperty({ example: 'Asia/Kolkata', description: 'Tenant timezone', required: false, default: 'UTC' })
     @IsOptional()
     @IsString()
     @MaxLength(50)
@@ -45,6 +45,13 @@ export class CreateTenantDto {
     @IsString()
     @MaxLength(10)
     locale?: string;
+
+    @ApiProperty({ example: 'FREE_TRIAL', description: 'Initial plan', required: false })
+    @IsOptional()
+    @IsEnum(['FREE_TRIAL', 'STARTER', 'GROWTH', 'PROFESSIONAL', 'ENTERPRISE'], {
+        message: 'plan must be one of: FREE_TRIAL, STARTER, GROWTH, PROFESSIONAL, ENTERPRISE'
+    })
+    plan?: string;
 }
 
 // Separate DTO for PATCH updates — plan, status changes from Super Admin
