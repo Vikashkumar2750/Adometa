@@ -29,7 +29,8 @@ interface Tenant {
     approved_by?: string;
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const _RAW = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API = _RAW.endsWith('/api') ? _RAW : `${_RAW}/api`;
 
 export default function TenantsPage() {
     const router = useRouter();

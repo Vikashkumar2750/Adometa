@@ -171,14 +171,17 @@ export class TenantsService {
         }
 
         tenant.status = 'ACTIVE';
-        tenant.approved_by = approvedBy;
+        // Don't store the hardcoded ENV admin UUID (00000000...) — it's not in super_admins table
+        const ENV_ADMIN_UUID = '00000000-0000-0000-0000-000000000000';
+        tenant.approved_by = (approvedBy && approvedBy !== ENV_ADMIN_UUID) ? approvedBy : null;
         tenant.approved_at = new Date();
 
         const approved = await this.tenantsRepository.save(tenant);
 
-        this.logger.log(`Tenant approved: ${id} by ${approvedBy}`);
+        this.logger.log(`Tenant approved: ${id} by ${approvedBy || 'ENV admin'}`);
         return approved;
     }
+
 
     /**
      * Reject tenant (marks as DELETED with rejection metadata)

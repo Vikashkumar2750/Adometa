@@ -15,7 +15,9 @@ import {
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const _RAW_API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API = _RAW_API.endsWith('/api') ? _RAW_API : `${_RAW_API}/api`;
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Tenant {

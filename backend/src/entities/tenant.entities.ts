@@ -41,10 +41,11 @@ export class Tenant {
 
     @Column({
         type: 'enum',
-        enum: ['FREE_TRIAL', 'BASIC', 'PRO', 'PREMIUM', 'ENTERPRISE'],
+        enum: ['FREE_TRIAL', 'STARTER', 'BASIC', 'GROWTH', 'PRO', 'PROFESSIONAL', 'PREMIUM', 'ENTERPRISE'],
         default: 'FREE_TRIAL',
     })
     plan: string;
+
 
     @Column({ type: 'varchar', length: 50, default: 'UTC' })
     timezone: string;
