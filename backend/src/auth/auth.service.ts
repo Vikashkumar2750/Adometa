@@ -115,6 +115,18 @@ export class AuthService {
 
         const user = await this.usersService.findByEmail(email);
         if (user && await bcrypt.compare(pass, user.password_hash)) {
+            // Block login if tenant is PENDING_APPROVAL or SUSPENDED
+            if (user.tenant_id) {
+                const tenantUser = await this.tenantUserRepo.findOne({
+                    where: { id: user.id },
+                    relations: ['tenant'],
+                });
+                const status = (tenantUser as any)?.tenant?.status;
+                if (status && status !== 'ACTIVE') {
+                    this.logger.warn(`Login blocked — ${email} tenant status: ${status}`);
+                    return null;
+                }
+            }
             const { password_hash, ...result } = user;
             return result;
         }

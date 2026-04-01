@@ -124,7 +124,7 @@ export class TenantsController {
         @Param('id', new ParseUUIDPipe()) id: string,
         @Request() req: any
     ) {
-        return this.tenantsService.approve(id, req.user.userId);
+        return this.tenantsService.approve(id, req.user.sub || req.user.id);
     }
 
     @Post(':id/reject')
