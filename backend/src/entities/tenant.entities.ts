@@ -57,7 +57,8 @@ export class Tenant {
     metadata: Record<string, any>;
 
     @Column({ type: 'uuid', nullable: true })
-    approved_by: string;
+    approved_by: string | null;
+
 
     @Column({ type: 'timestamp', nullable: true })
     approved_at: Date;
