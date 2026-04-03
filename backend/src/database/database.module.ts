@@ -23,59 +23,65 @@ import { AutomationRule } from '../automation/entities/automation-rule.entity';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                type: 'postgres',
-                host: configService.get<string>('DB_HOST'),
-                port: configService.get<number>('DB_PORT'),
-                username: configService.get<string>('DB_USER'),
-                password: configService.get<string>('DB_PASSWORD'),
-                database: configService.get<string>('DB_NAME'),
-                // Entity list — add new entities here + run matching SQL migration
-                entities: [
-                    SuperAdmin,
-                    Tenant,
-                    TenantUser,
-                    TenantWabaConfig,
-                    WebhookEvent,
-                    Contact,
-                    Campaign,
-                    Template,
-                    AuditLog,
-                    Segment,
-                    Lead,
-                    BlogPost,
-                    // Billing
-                    TenantWallet,
-                    TenantTransaction,
-                    TenantSettings,
-                    Invoice,
-                    InvoiceItem,
-                    // Team
-                    TeamActivityLog,
-                    // API Keys
-                    ApiKey,
-                    // Support
-                    SupportTicket,
-                    SupportMessage,
-                    // Automation
-                    AutomationRule,
-                ],
-                // Keep synchronize OFF — use SQL migrations instead
-                // New tables (leads, blog_posts) are created via run-migration script
-                synchronize: false,
-                logging: configService.get<string>('NODE_ENV') !== 'production',
-                // ⚡ Pool config — prevents connection pool exhaustion
-                extra: {
-                    max: 5,
-                    min: 1,
-                    idleTimeoutMillis: 30000,
-                    connectionTimeoutMillis: 10000,
-                    statement_timeout: 30000,
-                    query_timeout: 30000,
-                },
-                retryAttempts: 3,
-                retryDelay: 2000,
-            }),
+            useFactory: (configService: ConfigService) => {
+                // Support both DATABASE_URL (single string) and individual DB_* vars
+                const databaseUrl = configService.get<string>('DATABASE_URL');
+                
+                if (databaseUrl) {
+                    return {
+                        type: 'postgres' as const,
+                        url: databaseUrl,
+                        ssl: { rejectUnauthorized: false },
+                        entities: [
+                            SuperAdmin, Tenant, TenantUser, TenantWabaConfig,
+                            WebhookEvent, Contact, Campaign, Template,
+                            AuditLog, Segment, Lead, BlogPost,
+                            TenantWallet, TenantTransaction, TenantSettings,
+                            Invoice, InvoiceItem, TeamActivityLog, ApiKey,
+                            SupportTicket, SupportMessage, AutomationRule,
+                        ],
+                        synchronize: false,
+                        logging: configService.get<string>('NODE_ENV') !== 'production',
+                        extra: {
+                            max: 3,
+                            min: 1,
+                            idleTimeoutMillis: 30000,
+                            connectionTimeoutMillis: 15000,
+                        },
+                        retryAttempts: 5,
+                        retryDelay: 3000,
+                    };
+                }
+
+                // Fallback: individual DB_* vars
+                return {
+                    type: 'postgres' as const,
+                    host: configService.get<string>('DB_HOST'),
+                    port: configService.get<number>('DB_PORT') || 5432,
+                    username: configService.get<string>('DB_USERNAME') || configService.get<string>('DB_USER'),
+                    password: configService.get<string>('DB_PASSWORD'),
+                    database: configService.get<string>('DB_NAME') || configService.get<string>('DB_DATABASE'),
+                    ssl: configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+                    entities: [
+                        SuperAdmin, Tenant, TenantUser, TenantWabaConfig,
+                        WebhookEvent, Contact, Campaign, Template,
+                        AuditLog, Segment, Lead, BlogPost,
+                        TenantWallet, TenantTransaction, TenantSettings,
+                        Invoice, InvoiceItem, TeamActivityLog, ApiKey,
+                        SupportTicket, SupportMessage, AutomationRule,
+                    ],
+                    synchronize: false,
+                    logging: configService.get<string>('NODE_ENV') !== 'production',
+                    extra: {
+                        max: 3,
+                        min: 1,
+                        idleTimeoutMillis: 30000,
+                        connectionTimeoutMillis: 15000,
+                    },
+                    retryAttempts: 5,
+                    retryDelay: 3000,
+                };
+            },
         }),
     ],
 })
