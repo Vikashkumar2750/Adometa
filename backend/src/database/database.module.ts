@@ -18,36 +18,47 @@ import { ApiKey } from '../api-keys/entities/api-key.entity';
 import { SupportTicket, SupportMessage } from '../support/entities/support.entities';
 import { AutomationRule } from '../automation/entities/automation-rule.entity';
 
+// ✅ FIX: Allow self-signed certs from Supabase pooler in local dev
+// (pg v8+ requires this at process level — rejectUnauthorized in config alone is not enough)
+if (process.env.NODE_ENV !== 'production') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
+const ENTITIES = [
+    SuperAdmin, Tenant, TenantUser, TenantWabaConfig,
+    WebhookEvent, Contact, Campaign, Template,
+    AuditLog, Segment, Lead, BlogPost,
+    TenantWallet, TenantTransaction, TenantSettings,
+    Invoice, InvoiceItem, TeamActivityLog, ApiKey,
+    SupportTicket, SupportMessage, AutomationRule,
+];
+
+const POOL_EXTRA = {
+    max: 3,
+    min: 1,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 15000,
+    ssl: { rejectUnauthorized: false },
+};
+
 @Module({
     imports: [
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
-                // Support both DATABASE_URL (single string) and individual DB_* vars
                 const databaseUrl = configService.get<string>('DATABASE_URL');
-                
+                const isProduction = configService.get<string>('NODE_ENV') === 'production';
+
                 if (databaseUrl) {
                     return {
                         type: 'postgres' as const,
                         url: databaseUrl,
                         ssl: { rejectUnauthorized: false },
-                        entities: [
-                            SuperAdmin, Tenant, TenantUser, TenantWabaConfig,
-                            WebhookEvent, Contact, Campaign, Template,
-                            AuditLog, Segment, Lead, BlogPost,
-                            TenantWallet, TenantTransaction, TenantSettings,
-                            Invoice, InvoiceItem, TeamActivityLog, ApiKey,
-                            SupportTicket, SupportMessage, AutomationRule,
-                        ],
+                        entities: ENTITIES,
                         synchronize: false,
-                        logging: configService.get<string>('NODE_ENV') !== 'production',
-                        extra: {
-                            max: 3,
-                            min: 1,
-                            idleTimeoutMillis: 30000,
-                            connectionTimeoutMillis: 15000,
-                        },
+                        logging: !isProduction,
+                        extra: POOL_EXTRA,
                         retryAttempts: 5,
                         retryDelay: 3000,
                     };
@@ -61,23 +72,11 @@ import { AutomationRule } from '../automation/entities/automation-rule.entity';
                     username: configService.get<string>('DB_USERNAME') || configService.get<string>('DB_USER'),
                     password: configService.get<string>('DB_PASSWORD'),
                     database: configService.get<string>('DB_NAME') || configService.get<string>('DB_DATABASE'),
-                    ssl: configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
-                    entities: [
-                        SuperAdmin, Tenant, TenantUser, TenantWabaConfig,
-                        WebhookEvent, Contact, Campaign, Template,
-                        AuditLog, Segment, Lead, BlogPost,
-                        TenantWallet, TenantTransaction, TenantSettings,
-                        Invoice, InvoiceItem, TeamActivityLog, ApiKey,
-                        SupportTicket, SupportMessage, AutomationRule,
-                    ],
+                    ssl: { rejectUnauthorized: false },
+                    entities: ENTITIES,
                     synchronize: false,
-                    logging: configService.get<string>('NODE_ENV') !== 'production',
-                    extra: {
-                        max: 3,
-                        min: 1,
-                        idleTimeoutMillis: 30000,
-                        connectionTimeoutMillis: 15000,
-                    },
+                    logging: !isProduction,
+                    extra: POOL_EXTRA,
                     retryAttempts: 5,
                     retryDelay: 3000,
                 };
